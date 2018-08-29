@@ -1,12 +1,21 @@
 {
   "name": "solc-js",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "cross-browser solidity compiler for the web",
   "main": "lib/solc-js.js",
   "scripts": {
     "start": "budo demo.js:bundle.js --open --live --ssl",
     "build": "browserify demo.js > bundle.js"
   },
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "compiler",
+    "browser",
+    "web",
+    "abi",
+    "bytecode"
+  ],
   "license": "MIT",
   "dependencies": {
     "kv-idb": "^1.0.0"
