@@ -1,11 +1,15 @@
 {
   "name": "solc-js",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "cross-browser solidity compiler for the web",
-  "main": "lib/solc-js.js",
+  "main": "src/solc-js.js",
   "scripts": {
     "start": "budo demo.js:bundle.js --open --live --ssl",
     "build": "browserify demo.js > bundle.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ethereum-play/solc-js.git"
   },
   "keywords": [
     "ethereum",
@@ -17,6 +21,10 @@
     "bytecode"
   ],
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ethereum-play/solc-js/issues"
+  },
+  "homepage": "https://github.com/ethereum-play/solc-js#readme",
   "dependencies": {
     "kv-idb": "^1.0.0"
   },
