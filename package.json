@@ -1,6 +1,6 @@
 {
   "name": "solc-js",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "cross-browser solidity compiler for the web",
   "main": "src/solc-js.js",
   "scripts": {
