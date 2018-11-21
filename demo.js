@@ -2,7 +2,7 @@ console.time('start')
 const bel = require('bel')
 
 const solcjs = require('./')
-const selectVersion = require('./lib/version2url')
+const selectVersion = require('./src/node_modules/version2url')
 
 selectVersion((error, select) => {
   if (error) return console.error(error)
