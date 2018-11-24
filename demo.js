@@ -8,7 +8,7 @@ selectVersion((error, select) => {
   if (error) return console.error(error)
   const useVersion = (error, url) => {
     if (error) return console.error(error)
-    console.log(url)
+    console.log('url:', url)
     solcjs(url, start)
   }
   const { releases, nightly, all} = select
@@ -26,15 +26,23 @@ function selector (list, action) {
 
 function start (error, solc) {
   if (error) return console.error(error)
-  var input = ''
   console.time('compile stuff')
-  var output = solc.compile(input, 1)
+  let source = `
+  contract SimpleStorage {
+    uint storedData;
+    function set(uint x) public { storedData = x; }
+    function get() public view returns(uint) { return storedData;}
+  }`;
+  let output = solc.compile(source)
   console.timeEnd('compile stuff')
-  document.body.appendChild(bel`
-    <h1> success </h1>
-  `)
-  console.timeEnd('start')
-  console.log(output)
+  if (output && output.compiler) {
+    // document.body.appendChild(bel`<h1>success</h1>`)  
+    // console.dir(output);
+    console.log('***   success   ***');
+  } else {
+    console.log('***   fail   ***');
+  }
+  // console.timeEnd('start')
 
   for (var error in output['errors']) {
     var message = output['errors'][error]
@@ -42,16 +50,6 @@ function start (error, solc) {
     else console.error(message)
   }
 
-  const OUTPUT = {
-    '.bin': output.contracts[contractName].bytecode,
-    '.abi': output.contracts[contractName].interface,
-    'errors': output.errors,
-  }
-
-  // console.time('compile stuff')
-  // console.log(solc.compile(input, 1))
-  // console.timeEnd('compile stuff')
-  // console.log("compiler", solc)
   // testCompiler(solc)
 }
 
