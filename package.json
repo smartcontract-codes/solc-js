@@ -22,7 +22,7 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ethereum-play/solc-js/issues"
+    "url": "https://github.com/ethereum/play/issues"
   },
   "homepage": "https://github.com/ethereum-play/solc-js#readme",
   "dependencies": {
