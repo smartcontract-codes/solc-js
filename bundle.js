@@ -9,7 +9,7 @@ selectVersion((error, select) => {
   if (error) return console.error(error)
   const useVersion = (error, url) => {
     if (error) return console.error(error)
-    console.log(url)
+    console.log('url:', url)
     solcjs(url, start)
   }
   const { releases, nightly, all} = select
@@ -27,32 +27,30 @@ function selector (list, action) {
 
 function start (error, solc) {
   if (error) return console.error(error)
-  var input = ''
   console.time('compile stuff')
-  var output = solc.compile(input, 1)
+  let source = `
+contract Mortal {
+    address public owner;
+    constructor() public { owner = msg.sender; }
+}
+
+contract Greeter is Mortal {
+    string public greeting;
+    constructor(string memory _greeting) public {
+        greeting = _greeting;
+    }
+}
+  `;
+  let output = solc.compile(source)
   console.timeEnd('compile stuff')
-  document.body.appendChild(bel`
-    <h1> success </h1>
-  `)
-  console.timeEnd('start')
-  console.log(output)
-
-  for (var error in output['errors']) {
-    var message = output['errors'][error]
-    if (message.match(/^(.*:[0-9]*:[0-9]* )?Warning: /)) console.log(message)
-    else console.error(message)
+  if (output.success) {
+    // document.body.appendChild(bel`<h1>success</h1>`)  
+    // console.dir(output);
+    console.log('***   success   ***');
+  } else {
+    console.log('***   fail   ***');
   }
-
-  const OUTPUT = {
-    '.bin': output.contracts[contractName].bytecode,
-    '.abi': output.contracts[contractName].interface,
-    'errors': output.errors,
-  }
-
-  // console.time('compile stuff')
-  // console.log(solc.compile(input, 1))
-  // console.timeEnd('compile stuff')
-  // console.log("compiler", solc)
+  // console.timeEnd('start')
   // testCompiler(solc)
 }
 
@@ -82,7 +80,7 @@ function testCompiler (solc) {
   }, 5000)
 }
 
-},{"./":13,"./src/node_modules/version2url":12,"bel":3}],2:[function(require,module,exports){
+},{"./":14,"./src/node_modules/version2url":13,"bel":3}],2:[function(require,module,exports){
 var trailingNewlineRegex = /\n[\s]+$/
 var leadingNewlineRegex = /^\n[\s]+/
 var trailingSpaceRegex = /[\s]+$/
@@ -758,6 +756,64 @@ function cacheFetch ({ cache, url, caching, transform, timestamp }, done) {
 }
 
 },{"kv-idb":6}],8:[function(require,module,exports){
+module.exports = format;
+
+function getContractName(output) {
+  let { contracts } = output;
+  if (contracts) {
+    var name = Object.keys(contracts)[0];
+    if (name) {
+      let metadata;
+      if (name.indexOf(':') != -1) {
+        return name;
+      } else {
+        return Object.keys(contracts[name])[0];
+      }
+    }
+  }
+  return;
+}
+
+function getMetadata(output) {
+  let { contracts } = output;
+  if (contracts) {
+    var name = Object.keys(contracts)[0];
+    if (name) {
+      let metadata;
+      if (name.indexOf(':') != -1) {
+        metadata = contracts[name].metadata;
+      } else {
+        let name2 = Object.keys(contracts[name])[0];
+        metadata = (contracts[name])[name2].metadata;
+      }
+      metadata = JSON.parse(metadata);
+      // console.log('=== metadata ===');
+      // console.log(metadata);
+      return metadata;
+    }
+  }
+}
+
+function format(_output) {
+  // console.log('output:');
+  // console.log(_output);
+
+  let output = {};
+  output.contractName = getContractName(_output);
+  output.success = output.contractName ? true : false;
+
+  if (output.success) {
+    output.metadata = getMetadata(_output);
+    output.abi = output.metadata.output.abi;
+    output.version = output.metadata.compiler.version;
+  }
+  
+  output.errors = _output.errors;
+  console.log('new output:');
+  console.log(output);
+  return output;
+}
+},{}],9:[function(require,module,exports){
 // //////////////////////////////////////////////////////////////////
 // var Compiler = require('./src/compiler/compiler')
 // var CompilerInput = require('./src/compiler/compiler-input')
@@ -773,6 +829,7 @@ function cacheFetch ({ cache, url, caching, transform, timestamp }, done) {
 //     }
 // //////////////////////////////////////////////////////////////////
 const wrapper = require('./wrapper.js')
+const format = require('./format.js')
 // const solcABI = require('./abi.js')
 // const CompilerImport = require('./handle-imports.js')
 
@@ -792,35 +849,13 @@ function compiler (solc) {
   const _compiler = wrapper(solc)
   const api = {}
 
-  // var zelf = instantiate()
-  // var REMIX_SOLIDITY = new Compiler(_compiler, (url, cb) => zelf.importFileCb(url, cb))
-  // console.log('REMIX_SOLIDITY', REMIX_SOLIDITY)
-
   Object.keys(_compiler).forEach(key => {
     if (key === 'compile') {
-      // api.compile = function (files /* === main.js */, target) {
-      //   console.log('files =', files)
-      //   console.log('target =', target)
-      //   console.error(`[on:compile:start] solc.compile(files, target)`)
-      //   return REMIX_SOLIDITY.compile(files, target)
-      // }
       api.compile = function (sourcecode) {
         // console.error(`[on:compile:start] solc.compile(sourcecode)`)
-        var data = _compiler.compile(sourcecode, 1)
-        // console.log('metadata', data)
-        var contracts = data.contracts
-        var name = Object.keys(contracts)[0]
-        if (name) {
-          const {
-            // gasEstimates,
-            // interface: abi,
-            metadata,
-          } = contracts[name]
-          var settings = JSON.parse(metadata)
-          return settings
-        } else {
-          return data.errors
-        }
+        var output = _compiler.compile(sourcecode, 1);
+        var contracts = output.contracts
+        return format(output);
         // return {
         //   "compiler": { "version": settings.compiler.version },
         //   "language": "Solidity",
@@ -854,7 +889,7 @@ function compiler (solc) {
   return api
 }
 
-},{"./wrapper.js":11}],9:[function(require,module,exports){
+},{"./format.js":8,"./wrapper.js":12}],10:[function(require,module,exports){
 
 module.exports = { linkBytecode, findLinkReferences }
 
@@ -914,7 +949,7 @@ function findLinkReferences (bytecode) {
   return linkReferences
 }
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var linker = require('./linker.js');
 
 /// Translate old style version numbers to semver.
@@ -1111,73 +1146,175 @@ module.exports = {
   prettyPrintLegacyAssemblyJSON: prettyPrintLegacyAssemblyJSON
 };
 
-},{"./linker.js":9}],11:[function(require,module,exports){
+},{"./linker.js":10}],12:[function(require,module,exports){
 var translate = require('./translate.js')
 var linker = require('./linker.js')
 
+let soljson;
+
 const assert = (bool, msg) => { if (!bool) throw new Error(msg) }
+
+
+function wrapCallback(callback) {
+  assert(typeof callback === 'function', 'Invalid callback specified.')
+  return function (path, contents, error) {
+    var result = callback(soljson.Pointer_stringify(path))
+    if (typeof result.contents === 'string') copyString(result.contents, contents)
+    if (typeof result.error === 'string') copyString(result.error, error)
+  }
+}
+
+function copyString(str, ptr) {
+  var length = soljson.lengthBytesUTF8(str)
+  var buffer = soljson._malloc(length + 1)
+  soljson.stringToUTF8(str, buffer, length + 1)
+  soljson.setValue(ptr, buffer, '*')
+}
+
+function runWithReadCallback(readCallback, compile, args) {
+  if (readCallback === undefined) {
+    readCallback = function (path) {
+      return {
+        error: 'File import callback not supported'
+      };
+    };
+  }
+
+  // This is to support multiple versions of Emscripten.
+  var addFunction = soljson.addFunction || soljson.Runtime.addFunction;
+  var removeFunction = soljson.removeFunction || soljson.Runtime.removeFunction;
+
+  var cb = addFunction(wrapCallback(readCallback));
+  var output;
+  try {
+    args.push(cb);
+    output = compile.apply(undefined, args);
+  } catch (e) {
+    removeFunction(cb);
+    throw e;
+  }
+  removeFunction(cb);
+  return output;
+}
+
+function getCompileJSON() {
+  if ('_compileJSON' in soljson) {
+    return soljson.cwrap('compileJSON', 'string', ['string', 'number']);
+  }
+}
+
+function getCompileJSONMulti() {
+  if ('_compileJSONMulti' in soljson) {
+    return compileJSONMulti = soljson.cwrap('compileJSONMulti', 'string', ['string', 'number']);
+  }
+}
+
+function getCompileJSONCallback() {
+  if ('_compileJSONCallback' in soljson) {
+    var compileInternal = soljson.cwrap('compileJSONCallback', 'string', ['string', 'number', 'number']);
+    var compileJSONCallback = function (input, optimize, readCallback) {
+      return runWithReadCallback(readCallback, compileInternal, [input, optimize]);
+    };
+    return compileJSONCallback;
+  }
+}
+
+function getCompileStandard() {
+  var compileStandard;
+  if ('_compileStandard' in soljson) {
+    var compileStandardInternal = soljson.cwrap('compileStandard', 'string', ['string', 'number']);
+    compileStandard = function (input, readCallback) {
+      return runWithReadCallback(readCallback, compileStandardInternal, [input]);
+    };
+  }
+  if ('_solidity_compile' in soljson) {
+    var solidityCompile = soljson.cwrap('solidity_compile', 'string', ['string', 'number']);
+    compileStandard = function (input, readCallback) {
+      return runWithReadCallback(readCallback, solidityCompile, [input]);
+    };
+  }
+  return compileStandard;
+}
+
+function getVersion() {
+  let version;
+  if ('_solidity_version' in soljson) {
+    version = soljson.cwrap('solidity_version', 'string', []);
+  } else {
+    version = soljson.cwrap('version', 'string', []);
+  }
+  return version;
+}
+
+function getLicense() {
+  let license;
+  if ('_solidity_license' in soljson) {
+    license = soljson.cwrap('solidity_license', 'string', []);
+  } else if ('_license' in soljson) {
+    license = soljson.cwrap('license', 'string', []);
+  } else {
+    // pre 0.4.14
+    license = function () {
+      // return undefined
+    };
+  }
+  return license;
+}
+
+function getWrapperFormat(sourcecode) {
+  let input = {
+    language: 'Solidity',
+    settings: {
+      optimizer: {
+        enabled: true
+      },
+      metadata: {
+        useLiteralContent: true
+      },
+      outputSelection: {
+        "*": {
+          "*": ["abi", "metadata", "evm.bytecode"]
+        }
+      }
+    },
+    sources: {
+      'MyContract': {
+        content: sourcecode
+      }
+    }
+  };
+  return input;
+}
+
 
 module.exports = wrapper
 
-function wrapper (soljson) {
-  var compileJSON = soljson.cwrap('compileJSON', 'string', ['string', 'number'])
-  var compileJSONMulti = null
-  if ('_compileJSONMulti' in soljson) {
-    compileJSONMulti = soljson.cwrap('compileJSONMulti', 'string', ['string', 'number'])
-  }
-  var compileJSONCallback = null, compileStandard = null
-  if (('_compileJSONCallback' in soljson) || ('_compileStandard' in soljson)) {
-    function copyString (str, ptr) {
-      var length = soljson.lengthBytesUTF8(str)
-      var buffer = soljson._malloc(length + 1)
-      soljson.stringToUTF8(str, buffer, length + 1)
-      soljson.setValue(ptr, buffer, '*')
-    }
-    function wrapCallback (callback) {
-      assert(typeof callback === 'function', 'Invalid callback specified.')
-      return function (path, contents, error) {
-        var result = callback(soljson.Pointer_stringify(path))
-        if (typeof result.contents === 'string') copyString(result.contents, contents)
-        if (typeof result.error === 'string') copyString(result.error, error)
-      }
-    }
-    // This calls compile() with args || cb
-    function runWithReadCallback (readCallback, compile, args) {
-      if (readCallback === undefined) readCallback = path => ({ error: 'File import callback not supported' })
-      var cb = soljson.Runtime.addFunction(wrapCallback(readCallback))
-      var output
-      try {
-        args.push(cb)
-        output = compile.apply(undefined, args)
-      } catch (e) {
-        soljson.Runtime.removeFunction(cb)
-        throw e
-      }
-      soljson.Runtime.removeFunction(cb)
-      return output
-    }
-    var compileInternal = soljson.cwrap('compileJSONCallback', 'string', ['string', 'number', 'number'])
-    compileJSONCallback = function (input, optimize, readCallback) {
-      return runWithReadCallback(readCallback, compileInternal, [ input, optimize ])
-    }
-    if ('_compileStandard' in soljson) {
-      var compileStandardInternal = soljson.cwrap('compileStandard', 'string', ['string', 'number'])
-      compileStandard = function (input, readCallback) {
-        return runWithReadCallback(readCallback, compileStandardInternal, [ input ])
-      }
-    }
-  }
-  function compile (input, optimise, readCallback) {
+function wrapper(_soljson) {
+  soljson = _soljson;
+  // console.log('soljson:', soljson);
+  var compileJSON = getCompileJSON();
+  var compileJSONMulti = getCompileJSONMulti();
+  var compileJSONCallback = getCompileJSONCallback();
+  var compileStandard = getCompileStandard();
+  let version = getVersion();
+
+  function compile(input, optimise, readCallback) {
+    var v = version();
     var result = ''
-    if (readCallback !== undefined && compileJSONCallback !== null) {
+    if (parseFloat(v.substring(0, 5)) >= 0.5) {
+      result = compileStandardWrapper(JSON.stringify(getWrapperFormat(input)), readCallback);
+    } else if (readCallback !== undefined && compileJSONCallback !== null) {
       result = compileJSONCallback(JSON.stringify(input), optimise, readCallback)
     } else if (typeof input !== 'string' && compileJSONMulti !== null) {
       result = compileJSONMulti(JSON.stringify(input), optimise)
-    } else {
+    } else if (compileJSON != null) {
       result = compileJSON(input, optimise)
+    } else {
+      result = compileStandard(input, readCallback);
     }
     return JSON.parse(result)
   }
+
   function compileStandardWrapper (input, readCallback) {
     // Expects a Standard JSON I/O but supports old compilers
     if (compileStandard !== null) return compileStandard(input, readCallback)
@@ -1238,10 +1375,12 @@ function wrapper (soljson) {
     } // Try our luck with an ancient compiler
     return translateOutput(compileJSON(sources[Object.keys(sources)[0]], isOptimizerEnabled(input)), libraries)
   }
-  var version = soljson.cwrap('version', 'string', [])
+
+
+  // let version = getVersion();
   function versionToSemver () { return translate.versionToSemver(version()) }
-  function license () { /* return undefined */ }
-  if ('_license' in soljson) license = soljson.cwrap('license', 'string', [])
+  let license = getLicense();
+
   return {
     version: version,
     semver: versionToSemver,
@@ -1256,7 +1395,7 @@ function wrapper (soljson) {
   }
 }
 
-},{"./linker.js":9,"./translate.js":10}],12:[function(require,module,exports){
+},{"./linker.js":10,"./translate.js":11}],13:[function(require,module,exports){
 const ajax = require('ajax-cache')
 const baseURL = 'https://solc-bin.ethereum.org/bin'
 // const baseURL = 'https://ethereum.github.io/solc-bin/bin'
@@ -1342,7 +1481,7 @@ function processList (json) {
   return lists
 }
 
-},{"ajax-cache":7}],13:[function(require,module,exports){
+},{"ajax-cache":7}],14:[function(require,module,exports){
 const ajax = require('ajax-cache')
 const solcwrapper = require('solc-wrapper')
 const version2url = require('version2url')
@@ -1369,7 +1508,7 @@ function solcjs (compilerURL, done) {
       // @NOTE: compiling a simple contract dummy seems to
       // warm up the compiler, so that it compiles faster later on
       // @TODO: also it somehow throws the first time ?!?
-      var content = 'contract x { function g() {} }'
+      var content = 'contract x { function g() public {} }'
       solcjs.compile(content)
     } catch (e) {
       // console.error('wtf - first compile?!?', e)
@@ -1398,4 +1537,4 @@ function load (sourcecode) {
   return compiler
 }
 
-},{"ajax-cache":7,"solc-wrapper":8,"version2url":12}]},{},[1]);
+},{"ajax-cache":7,"solc-wrapper":9,"version2url":13}]},{},[1]);
