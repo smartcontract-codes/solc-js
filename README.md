@@ -5,6 +5,8 @@ cross-browser solidity compiler for the web
 * JavaScript bindings for the [solidity compiler](https://github.com/ethereum/solidity)
 * Uses the emscripten compiled solidity found in the [solc-bin repository](https://github.com/ethereum/solc-bin)
 
+In nodejs you can instead use [solc](https://www.npmjs.com/package/solc) or [solc-native](https://www.npmjs.com/package/solc-native)
+
 # usage
 **this module is work in progress**  
 [`npm install solc-js`](https://www.npmjs.com/package/solc-js)
@@ -13,3 +15,6 @@ const solcjs = require('solc-js')
 
 // for now, see `demo.js`
 ```
+
+# contribute
+feel free to make pull requests or file issues [here](https://github.com/ethereum/play/issues)
