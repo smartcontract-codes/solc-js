@@ -1,4 +1,5 @@
 # solc-js
+
 cross-browser solidity compiler for the web
 
 **smaller and faster alternative to [solc](https://www.npmjs.com/package/solc) for browser-only environments**
@@ -7,13 +8,27 @@ cross-browser solidity compiler for the web
 
 In nodejs you can instead use [solc](https://www.npmjs.com/package/solc) or [solc-native](https://www.npmjs.com/package/solc-native)
 
-# usage
+### usage
+
 **this module is work in progress**  
 [`npm install solc-js`](https://www.npmjs.com/package/solc-js)
 ```js
 const solcjs = require('solc-js')
 
 // for now, see `demo.js`
+```
+
+### Standard Output Format
+
+```json
+{
+  "abi": [{…}, {…}],
+  "contractName": "SimpleStorage",
+  "errors": [{…}],
+  "metadata": {compiler: {…}, language: "Solidity", output: {…}, settings: {…}, sources: {…}, …},
+  "success": true,
+  "version": "0.5.0+commit.1d4f565a"
+}
 ```
 
 # contribute

@@ -35,7 +35,7 @@ function start (error, solc) {
   }`;
   let output = solc.compile(source)
   console.timeEnd('compile stuff')
-  if (output && output.compiler) {
+  if (output.success) {
     // document.body.appendChild(bel`<h1>success</h1>`)  
     // console.dir(output);
     console.log('***   success   ***');
@@ -43,13 +43,6 @@ function start (error, solc) {
     console.log('***   fail   ***');
   }
   // console.timeEnd('start')
-
-  for (var error in output['errors']) {
-    var message = output['errors'][error]
-    if (message.match(/^(.*:[0-9]*:[0-9]* )?Warning: /)) console.log(message)
-    else console.error(message)
-  }
-
   // testCompiler(solc)
 }
 
