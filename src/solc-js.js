@@ -24,7 +24,7 @@ function solcjs (compilerURL, done) {
       // @NOTE: compiling a simple contract dummy seems to
       // warm up the compiler, so that it compiles faster later on
       // @TODO: also it somehow throws the first time ?!?
-      var content = 'contract x { function g() {} }'
+      var content = 'contract x { function g() public {} }'
       solcjs.compile(content)
     } catch (e) {
       // console.error('wtf - first compile?!?', e)

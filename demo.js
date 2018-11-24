@@ -28,11 +28,18 @@ function start (error, solc) {
   if (error) return console.error(error)
   console.time('compile stuff')
   let source = `
-  contract SimpleStorage {
-    uint storedData;
-    function set(uint x) public { storedData = x; }
-    function get() public view returns(uint) { return storedData;}
-  }`;
+contract Mortal {
+    address public owner;
+    constructor() public { owner = msg.sender; }
+}
+
+contract Greeter is Mortal {
+    string public greeting;
+    constructor(string memory _greeting) public {
+        greeting = _greeting;
+    }
+}
+  `;
   let output = solc.compile(source)
   console.timeEnd('compile stuff')
   if (output.success) {
