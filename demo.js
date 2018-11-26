@@ -1,8 +1,9 @@
-console.time('start')
+console.time('[start]')
 const bel = require('bel')
+const sca = require('smartcontract-app')
 
 const solcjs = require('./')
-const selectVersion = require('./src/node_modules/version2url')
+const selectVersion = solcjs.version2url // require('./src/node_modules/version2url')
 
 selectVersion((error, select) => {
   if (error) return console.error(error)
@@ -12,7 +13,10 @@ selectVersion((error, select) => {
     solcjs(url, start)
   }
   const { releases, nightly, all} = select
-  select(releases[0], useVersion)
+
+  const version = releases[0] // @NOTE: hard code to use latest version
+
+  select(version, useVersion)
   document.body.appendChild(selector(releases, v => select(v, useVersion)))
 })
 
@@ -24,33 +28,38 @@ function selector (list, action) {
     </select>`
 }
 
-function start (error, solc) {
+async function start (error, solc) {
   if (error) return console.error(error)
-  console.time('compile stuff')
-  let source = `
-contract Mortal {
-    address public owner;
-    constructor() public { owner = msg.sender; }
-}
-
-contract Greeter is Mortal {
-    string public greeting;
-    constructor(string memory _greeting) public {
-        greeting = _greeting;
+  console.time('[compile stuff]')
+  try {
+    // pragma solidity ^0.4.25;
+    var output = await /* solc(input) // OR */ solc`
+    contract Mortal {
+      address public owner;
+      constructor() public { owner = msg.sender; }
+      function kill() { if (msg.sender == owner) selfdestruct(owner); }
     }
-}
-  `;
-  let output = solc.compile(source)
-  console.timeEnd('compile stuff')
-  if (output.success) {
-    // document.body.appendChild(bel`<h1>success</h1>`)  
-    // console.dir(output);
-    console.log('***   success   ***');
-  } else {
-    console.log('***   fail   ***');
+
+    contract Greeter is Mortal {
+      string public greeting;
+      constructor(string memory _greeting) public {
+        greeting = _greeting;
+      }
+    }`
+    console.log('***   success   ***')
+    document.body.appendChild(bel`<h1>success</h1>`)
+    console.log('[output]', output)
+    debugger
+    // testCompiler(solc)
+  } catch (error) {
+    console.log('***   fail   ***')
+    document.body.appendChild(bel`<h1>fail</h1>`)
+    console.error('[error]', error)
+    debugger
+  } finally {
+    console.timeEnd('[compile stuff]')
+    console.timeEnd('[start]')
   }
-  // console.timeEnd('start')
-  // testCompiler(solc)
 }
 
 
@@ -58,23 +67,18 @@ function testCompiler (solc) {
   var input1 = 'contract x { function g() {} }'
   var input2 = 'contract y { function f() {} }'
   // Setting 1 as second paramateractivates the optimiser
-  function compile (input) {
-    console.time('compile')
+  async function compile (input) {
+    console.time('[compile]')
+    // var output = await solc(input)
     var output = solc.compile(input, 1)
-    console.timeEnd('compile')
+    console.timeEnd('[compile]')
     console.log('output', output)
   }
-  var id = setInterval(() => {
-    compile(input1)
-  }, 500)
+  var id = setInterval(() => compile(input1), 500)
   setTimeout(() => {
     console.log('====================')
     clearInterval(id)
-    id = setInterval(() => {
-      compile(input2)
-    }, 500)
-    setTimeout(() => {
-      clearInterval(id)
-    }, 5000)
+    id = setInterval(() => compile(input2), 500)
+    setTimeout(() => clearInterval(id), 5000)
   }, 5000)
 }
