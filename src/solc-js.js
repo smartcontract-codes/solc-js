@@ -1,7 +1,35 @@
+// //////////////////////////////////////////////////////////////////
+// var Compiler = require('./src/compiler/compiler')
+// var CompilerInput = require('./src/compiler/compiler-input')
+// module.exports = { Compiler, CompilerInput }
+// => Provides:
+//
+//     {
+//         InternalCallTree: InternalCallTree,
+//         SolidityProxy: SolidityProxy,
+//         localDecoder: localDecoder,
+//         stateDecoder: stateDecoder,
+//         CodeAnalysis: CodeAnalysis
+//     }
+// //////////////////////////////////////////////////////////////////
 const ajax = require('ajax-cache')
-const solcwrapper = require('solc-wrapper')
 const version2url = require('version2url')
 
+const wrapper = require('solc-wrapper/wrapper.js')
+const format = require('solc-wrapper/format.js')
+const solcABI = require('solc-wrapper/abi-patcher.js')
+const CompilerImport = require('solc-wrapper/handle-imports.js')
+
+/******************************************************************************
+  MODULE
+******************************************************************************/
+/*
+  triggers
+  - compilationFinished
+  - compilerLoaded
+  - compilationStarted
+  - compilationDuration
+*/
 module.exports = solcjs
 
 solcjs.version2url = version2url
@@ -9,6 +37,7 @@ solcjs.version2url = version2url
 function solcjs (compilerURL, done) {
   if (typeof done !== 'function') return
   if (typeof compilerURL !== 'string') return done(new Error('`compilerURL` must be a url string'))
+
   const request = { url: compilerURL, cache: true }
   console.time('[fetch compiler]')
   ajax(request, (error, compilersource) => {
@@ -21,7 +50,63 @@ function solcjs (compilerURL, done) {
     // console.debug('compiler length:', compilersource.length)
     // console.log(Object.keys(compiler).length)
     console.time('[wrap compiler]')
-    const solcjs = solcwrapper(solc)
+
+    // var zelf = instantiate()
+    // var REMIX_SOLIDITY = new Compiler(_compiler, (url, cb) => zelf.importFileCb(url, cb))
+    // console.log('REMIX_SOLIDITY', REMIX_SOLIDITY)
+
+    const _compiler = wrapper(solc)
+    const api = {}
+
+    Object.keys(_compiler).forEach(key => {
+      if (key === 'compile') {
+        // @TODO: allow to pass FILE_PATH instead of SOURCE_CODE
+        // api.compile = function (files /* === main.js */, target) {
+        //   console.log('files =', files)
+        //   console.log('target =', target)
+        //   console.error(`[on:compile:start] solc.compile(files, target)`)
+        //   return REMIX_SOLIDITY.compile(files, target)
+        // }
+        api.compile = function (version, sourcecode = '', done) {
+          // console.error(`[on:compile:start] solc.compile(sourcecode)`)
+          var data = _compiler.compile(sourcecode, 1)
+          if (!Object.keys(data.contracts).length) {
+            var R = /^(.*):(\d+):(\d+):(.*):/
+            var err = data.errors[0]
+            if (typeof err === 'string') {
+              var type = R.exec(err)
+              err = {
+                component: 'general',
+                formattedMessage: err,
+                message: err,
+                type: type ? type[4].trim() : 'Error'
+              }
+            }
+            return done(err)
+          }
+          var output = format(version, data)
+          done(null, output)
+        }
+      }
+      else if (typeof _compiler[key] === 'function') api[key] = function (...args) {
+        console.error(`compiler.${key}(...args)`, args)
+        return _compiler[key].apply(_compiler, args)
+      }
+      else Object.defineProperty(api, key, {
+        get () {
+          var currentValue = _compiler[key]
+          console.error(`compiler.${key} === `, currentValue)
+          return currentValue
+        },
+        set (newValue) {
+          console.error(`compiler.${key} = `, newValue)
+          return _compiler[key] = newValue
+        },
+        enumerable: true,
+        configurable: true
+      })
+    })
+    const solcjs = api
     console.timeEnd('[wrap compiler]')
 
     version2url((err, select) => {

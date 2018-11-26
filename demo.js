@@ -5,6 +5,14 @@ const sca = require('smartcontract-app')
 const solcjs = require('./')
 const selectVersion = solcjs.version2url // require('./src/node_modules/version2url')
 
+/* @TODO:
+
+  var { all } = await solcjs.versions()
+  var compiler = await solcjs(all[0])
+  var output = compiler`...code...`
+
+*/
+
 selectVersion((error, select) => {
   if (error) return console.error(error)
   const useVersion = (error, url) => {
@@ -49,13 +57,33 @@ async function start (error, solc) {
     console.log('***   success   ***')
     document.body.appendChild(bel`<h1>success</h1>`)
     console.log('[output]', output)
-    debugger
+    var opts = {
+        metadata: {
+        compiler: { version: output[0].compiler.version },
+        language: output[0].compiler.language,
+        output: {
+          abi: JSON.parse(output[0].abi),
+          devdoc: output[0].metadata.devdoc,
+          userdoc: output[0].metadata.userdoc
+        },
+        settings: {
+          compilationTarget: { '': output[0].sources.compilationTarget },
+          evmVersion: output[0].compiler.evmVersion,
+          libraries: output[0].sources.libraries,
+          optimizer: { enabled: output[0].compiler.optimizer, runs: output[0].compiler.runs },
+          remapings: output[0].sources.remappings
+        },
+        sources: { '': output[0].sources.sourcecode }
+      }
+    }
+    var el = sca(opts)
+    document.body.appendChild(el)
+    // @TODO: do in-website-only most minimal test library + iframe compatible dom reporter
     // testCompiler(solc)
   } catch (error) {
     console.log('***   fail   ***')
     document.body.appendChild(bel`<h1>fail</h1>`)
     console.error('[error]', error)
-    debugger
   } finally {
     console.timeEnd('[compile stuff]')
     console.timeEnd('[start]')
