@@ -1,4 +1,7 @@
 # solc-js
+**`!!! this module is work in progress !!!`**
+
+---
 
 cross-browser solidity compiler for the web
 
@@ -9,18 +12,55 @@ cross-browser solidity compiler for the web
 In nodejs you can instead use [solc](https://www.npmjs.com/package/solc) or [solc-native](https://www.npmjs.com/package/solc-native)
 
 ### usage
-
-**this module is work in progress**  
 [`npm install solc-js`](https://www.npmjs.com/package/solc-js)
 ```js
 const solcjs = require('solc-js')
 
-// for now, see `demo.js`
+const list // can be:
+// 1. [optional] URL to fetch compiler version list from custom url
+// 2. or [optional] object of versions mapped to download urls for versions
+
+const {
+  // @NOTE: if the solidity team indicates the following:
+  // @TODO: should we also allow for labels like?
+  // latest,
+  // next,
+  // stable,
+  all,     // array of all versions
+  release, // array of all release versions only
+  nightly, // array of all nightly versions only
+} = await solcjs.versions(list/* if undefined, uses internal DEFAULT `url` */)
+
+var compiler
+try {
+  const version = nightly[0]
+  compiler = await solcjs(version/*if undefined, uses latest release */)
+  const { name, url } = compiler.version
+  console.log(name) // name === nightly[0]
+  console.log(url)  // e.g. https://.....
+} catch (e) {
+  console.error('version not available')
+}
+
+// custom mechanism to import code used by solidity contracts
+compiler.on(async import_url => await fetch(import_url))
+
+// USE
+const output1 = await compiler`...code...`
+const output2 = await compiler(`...code...`)
+console.log(output1)
+console.log(output2)
+// OR
+const compileA = compiler`...code...`
+const compileB = compiler(`...code...`)
+const [outputA, outputB] = [await compileA, await compileB]
+console.log(outputA)
+console.log(outputB)
 ```
 
 ### Standard Output Format
 
-```json
+```js
 {
   "abi": [{…}, {…}],
   "contractName": "SimpleStorage",
