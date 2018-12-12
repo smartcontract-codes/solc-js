@@ -71,5 +71,5 @@ console.log(outputB)
 }
 ```
 
-# contribute
+### contribute
 feel free to make pull requests or file issues [here](https://github.com/ethereum/play/issues)
