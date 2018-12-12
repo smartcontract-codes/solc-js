@@ -1,25 +1,28 @@
 // from: sindresorhus/semver-regex
-var semverRegex = /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ig
+var semverRegex = /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/ig;
 
-function cmp (a, b) { // from: substack/semver-compare
-    var pa = a.split('.'), pb = b.split('.')
-    for (var i = 0; i < 3; i++) {
-        var na = Number(pa[i]), nb = Number(pb[i])
-        if (na > nb) return 1
-        if (nb > na) return -1
-        if (!isNaN(na) && isNaN(nb)) return 1
-        if (isNaN(na) && !isNaN(nb)) return -1
-    }
-    return 0
+// from: substack/semver-compare
+function cmp (a, b) {
+  var pa = a.split('.'), pb = b.split('.');
+  for (var i = 0; i < 3; i++) {
+    var na = Number(pa[i]), nb = Number(pb[i]);
+    if (na > nb) return 1;
+    if (nb > na) return -1;
+    if (!isNaN(na) && isNaN(nb)) return 1;
+    if (isNaN(na) && !isNaN(nb)) return -1;
+  }
+  return 0;
 }
+
+// semver.lt('1.2.3', '9.8.7') // true
 var semver = {
-  lt (a, b) { // semver.lt('1.2.3', '9.8.7') // true
-    var A = a.match(semverRegex), B = b.match(semverRegex)
+  lt(a, b) { 
+    var A = a.match(semverRegex), B = b.match(semverRegex);
     if (A && A.length === 1 && B && B.length === 1) {
-      return cmp(A[0], B[0]) === -1
+      return cmp(A[0], B[0]) === -1;
     }
   }
-}
+};
 
 function update (compilerVersion, abi) {
   var hasConstructor = false;

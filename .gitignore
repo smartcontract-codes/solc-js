@@ -1,4 +1,12 @@
 /node_modules/*
 package-lock.json
 
-/@todo/*
+/@todo
+.vscode/
+.nyc_output/
+coverage/
+compile.json
+
+.nyc_output/
+coverage/
+output/
