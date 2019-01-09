@@ -4,7 +4,6 @@ function mock() {
   if (!global.window) {
     const mocks = require('mock-browser').mocks;
     let MockBrowser = mocks.MockBrowser;
-    // let MockStorage = mocks.MockStorage;
     global.window = MockBrowser.createWindow();
     window.indexedDB = require('fake-indexeddb');
   }

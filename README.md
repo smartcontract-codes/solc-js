@@ -1,7 +1,10 @@
 # solc-js
-**`!!! this module is work in progress !!!`**
 
----
+![Travis](https://img.shields.io/travis/ethereum-play/solc-js.svg)
+[![codecov](https://codecov.io/gh/ethereum-play/solc-js/branch/master/graph/badge.svg)](https://codecov.io/gh/alincode/ethereum-play/solc-js)![npm downloads](https://img.shields.io/npm/dt/ethereum-play/solc-js.svg)
+[![Dependency Status](https://img.shields.io/david/ethereum-play/solc-js.svg?style=flat)](https://david-dm.org/ethereum-play/solc-js)
+
+**`!!! this module is work in progress !!!`**
 
 cross-browser solidity compiler for the web
 
@@ -11,51 +14,154 @@ cross-browser solidity compiler for the web
 
 In nodejs you can instead use [solc](https://www.npmjs.com/package/solc) or [solc-native](https://www.npmjs.com/package/solc-native)
 
-### usage
-[`npm install solc-js`](https://www.npmjs.com/package/solc-js)
+### Install
+
+```sh
+npm install solc-js
+```
+
+### Usage
+
 ```js
-const solcjs = require('solc-js')
+const solcjs = require('solc-js');
+```
+**await solcjs(version)**
 
-const list // can be:
-// 1. [optional] URL to fetch compiler version list from custom url
-// 2. or [optional] object of versions mapped to download urls for versions
+```js
+const version = 'v0.5.1-stable-2018.12.03';
+let compiler = await solcjs(version);
 
-const {
-  // @NOTE: if the solidity team indicates the following:
-  // @TODO: should we also allow for labels like?
-  // latest,
-  // next,
-  // stable,
-  all,     // array of all versions
-  release, // array of all release versions only
-  nightly, // array of all nightly versions only
-} = await solcjs.versions(list/* if undefined, uses internal DEFAULT `url` */)
+// or
 
-var compiler
-try {
-  const version = nightly[0]
-  compiler = await solcjs(version/*if undefined, uses latest release */)
-  const { name, url } = compiler.version
-  console.log(name) // name === nightly[0]
-  console.log(url)  // e.g. https://.....
-} catch (e) {
-  console.error('version not available')
-}
+// let compiler = await solcjs();
 
-// custom mechanism to import code used by solidity contracts
-compiler.on(async import_url => await fetch(import_url))
+const sourceCode = `
+  pragma solidity >0.4.99 <0.6.0;
 
-// USE
-const output1 = await compiler`...code...`
-const output2 = await compiler(`...code...`)
-console.log(output1)
-console.log(output2)
-// OR
-const compileA = compiler`...code...`
-const compileB = compiler(`...code...`)
-const [outputA, outputB] = [await compileA, await compileB]
-console.log(outputA)
-console.log(outputB)
+  library OldLibrary {
+    function someFunction(uint8 a) public returns(bool);
+  }
+
+  contract NewContract {
+    function f(uint8 a) public returns (bool) {
+        return OldLibrary.someFunction(a);
+    }
+  }`;
+let output = await compiler(sourceCode);
+```
+
+**await solcjs(version).version**
+
+```js
+const version = 'v0.4.25-stable-2018.09.13';
+let compiler = await solcjs(version);
+console.dir(compiler.version);
+// { name: 'v0.4.25-stable-2018.09.13',
+// url: 'https://solc-bin.ethereum.org/bin/soljson-v0.4.25+commit.59dbf8f1.js' }
+```
+
+**await solcjs.versions()**
+
+```js
+let select = await solcjs.versions();
+
+const { releases, nightly, all } = select;
+console.log(releases[0]);
+// v0.4.25-stable-2018.09.13
+```
+<!-- 
+```js
+const list = '';
+let select = await solcjs.versions(list);
+
+const { releases, nightly, all } = select;
+console.log(releases[0]);
+``` -->
+
+**await solcjs.version2url(version)**
+
+```js
+let version = 'v0.4.25-stable-2018.09.13';
+let url = await solcjs.version2url(version);
+console.log(url);
+// https://solc-bin.ethereum.org/bin/soljson-v0.4.25+commit.59dbf8f1.js
+```
+
+```js
+let version = 'latest';
+let url = await solcjs.version2url(version);
+console.log(url);
+// https://solc-bin.ethereum.org/bin/soljson-v0.1.1+commit.6ff4cd6.js
+```
+
+**await compiler(sourceCode);**
+
+```js
+let compiler = await solcjs();
+
+const sourceCode = `
+  library OldLibrary {
+      function someFunction(uint8 a) public returns(bool);
+  }
+
+  contract NewContract {
+      function f(uint8 a) public returns (bool) {
+          return OldLibrary.someFunction(a);
+      }
+  }`;
+
+let output = await compiler(sourceCode);
+```
+
+```js
+let compiler = await solcjs();
+
+const sourceCode = `
+  import 'https://github.com/OpenZeppelin/openzeppelin-solidity/contracts/math/SafeMath.sol';
+
+  library OldLibrary {
+      function someFunction(uint8 a) public returns(bool);
+  }
+
+  contract NewContract {
+      function f(uint8 a) public returns (bool) {
+          return OldLibrary.someFunction(a);
+      }
+  }`;
+
+let output = await compiler(sourceCode);
+```
+
+**await compiler(sourceCode, getImportContent)**
+
+```js
+const version = 'v0.5.1-stable-2018.12.03';
+let compiler = await solcjs(version);
+const solcResolver = require('solc-resolver');
+
+const sourceCode = `
+  pragma solidity >0.4.99 <0.6.0;
+
+  import "lib.sol";
+
+  library OldLibrary {
+    function someFunction(uint8 a) public returns(bool);
+  }
+
+  contract NewContract {
+    function f(uint8 a) public returns (bool) {
+        return OldLibrary.someFunction(a);
+    }
+  }`;
+
+let myDB = new Map();
+myDB.set('lib.sol', 'library L { function f() internal returns (uint) { return 7; } }');
+
+const getImportContent = async function (path) {
+  return myDB.has(path) ? myDB.get(path) : await solcResolver.getImportContent(path);
+};
+
+let output = await compiler(sourceCode, getImportContent);
 ```
 
 ### Standard Output Format
@@ -70,6 +176,13 @@ console.log(outputB)
   "version": "0.5.0+commit.1d4f565a"
 }
 ```
+
+### Relevant Projects
+
+* [solc-import](https://github.com/alincode/solc-import)
+* [solc-resolver](https://github.com/alincode/solc-resolver)
+* [solc-version](https://github.com/alincode/solc-version)
+* [solcjs-core](https://github.com/alincode/solcjs-core)
 
 ### contribute
 feel free to make pull requests or file issues [here](https://github.com/ethereum/play/issues)

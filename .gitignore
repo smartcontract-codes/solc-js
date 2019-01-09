@@ -10,3 +10,4 @@ compile.json
 .nyc_output/
 coverage/
 output/
+*.log
