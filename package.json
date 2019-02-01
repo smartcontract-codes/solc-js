@@ -34,10 +34,14 @@
   "dependencies": {
     "ajax-caching": "^0.1.0",
     "kv-idb": "^1.0.0",
-    "solc-import": "0.0.1",
-    "solc-resolver": "0.0.2",
-    "solc-version": "^0.1.1",
-    "solcjs-core": "^0.1.2"
+    "resolve-github": "^0.1.0",
+    "resolve-http": "^0.1.0",
+    "resolve-ipfs": "^0.1.0",
+    "resolve-swarm": "^0.1.0",
+    "solc-import": "^0.0.2",
+    "solc-resolver": "^0.2.1",
+    "solc-version": "^0.1.6",
+    "solcjs-core": "^0.2.0"
   },
   "devDependencies": {
     "bel": "^6.0.0",
@@ -50,6 +54,7 @@
     "mocha": "^5.2.0",
     "mock-browser": "^0.92.14",
     "nyc": "^13.1.0",
-    "smartcontract-app": "^2.0.0"
+    "smartcontract-app": "^2.0.0",
+    "solcjs-mock": "0.0.1"
   }
 }
