@@ -1,11 +1,11 @@
 {
   "name": "solc-js",
-  "version": "0.5.5",
+  "version": "1.0.0",
   "description": "cross-browser solidity compiler for the web",
   "main": "src/index.js",
   "scripts": {
-    "start": "budo demo.js:bundle.js --open --live --ssl",
-    "build": "browserify demo.js > bundle.js",
+    "start": "budo demo/demo.js:bundle.js --title $npm_package_name --force-default-index --open --live --ssl",
+    "build": "browserify --full-paths demo/demo.js > bundle.js",
     "lint": "eslint src",
     "test": "mocha --recursive -t 30s",
     "coverage": "nyc --reporter=html --reporter=text mocha --recursive -t 30s",
@@ -47,6 +47,7 @@
     "bel": "^6.0.0",
     "budo": "^11.3.2",
     "chai": "^4.2.0",
+    "codecov": "^3.2.0",
     "cross-fetch": "^2.2.3",
     "eslint": "^5.9.0",
     "eslint-plugin-mocha": "^5.2.0",
@@ -54,7 +55,7 @@
     "mocha": "^5.2.0",
     "mock-browser": "^0.92.14",
     "nyc": "^13.1.0",
-    "smartcontract-app": "^2.0.0",
+    "smartcontract-app": "^2.4.0",
     "solcjs-mock": "0.0.1"
   }
 }
