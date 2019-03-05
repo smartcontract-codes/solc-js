@@ -154,14 +154,19 @@ const sourceCode = `
 const store = new Map()
 store.set('lib.sol', 'library L { function f() internal returns (uint) { return 7; } }')
 
-const resolveGithub = require('resolve-github')
-const resolveIpfs = require('resolve-ipfs')
-const ResolverEngine = require('solc-resolver').ResolverEngine
-const resolverEngine = new ResolverEngine()
-resolverEngine.addResolver(resolveGithub)
-resolverEngine.addResolver(resolveIpfs)
+const ResolverEngine = require('solc-resolver').resolverEngine;
+let resolveGithub = require('resolve-github');
+let resolveIpfs = require('resolve-ipfs');
+let resolveHttp = require('resolve-http');
 
-const getImportContent =
+let resolverEngine = new ResolverEngine();
+resolverEngine.addResolver(resolveGithub);
+resolverEngine.addResolver(resolveIpfs);
+resolverEngine.addResolver(resolveHttp);
+
+const getImportContent = async function (path) {
+  return myDB.has(path) ? myDB.get(path) : await resolverEngine.require(path);
+};
 
 const output = await compiler(sourceCode, async (path) => {
 return store.has(path) ? store.get(path) : await resolverEngine.require(path))
