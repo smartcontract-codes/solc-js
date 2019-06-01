@@ -34,7 +34,7 @@
   "dependencies": {
     "ajax-caching": "^0.1.0",
     "kv-idb": "^1.0.0",
-    "resolve-github": "^0.1.0",
+    "resolve-github": "^0.2.0",
     "resolve-http": "^0.2.0",
     "resolve-ipfs": "^0.1.0",
     "resolve-swarm": "^0.1.0",
