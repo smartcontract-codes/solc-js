@@ -1,3 +1,5 @@
+[![Join the chat at https://gitter.im/ethereum/play](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ethereum/play?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 # solc-js
 cross-browser solidity compiler for the web
 
@@ -9,7 +11,14 @@ cross-browser solidity compiler for the web
 * JavaScript bindings for the [solidity compiler](https://github.com/ethereum/solidity)
 * Uses the emscripten compiled solidity found in the [solc-bin repository](https://github.com/ethereum/solc-bin)
 
-In nodejs you can instead use [solc](https://www.npmjs.com/package/solc) or [solc-native](https://www.npmjs.com/package/solc-native)
+In nodejs you can instead use [solc](https://www.npmjs.com/package/solc) or [solc-native](https://www.npmjs.com/package/solc-
+native)
+
+## How can I help?
+
+1. Open issues on things that are broken
+2. Fix open issues by sending PRs
+3. Add documentation
 
 ### Install
 
@@ -186,12 +195,14 @@ return store.has(path) ? store.get(path) : await resolverEngine.require(path))
 }
 ```
 
-### Relevant Projects
+### Other related projects
 
 * [solc-import](https://github.com/alincode/solc-import)
 * [solc-resolver](https://github.com/alincode/solc-resolver)
 * [solc-version](https://github.com/alincode/solc-version)
 * [solcjs-core](https://github.com/alincode/solcjs-core)
 
-### contribute
-feel free to make pull requests or file issues [here](https://github.com/ethereum/play/issues)
+
+## License
+
+MIT
