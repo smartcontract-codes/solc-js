@@ -3,10 +3,6 @@
 # solc-js
 cross-browser solidity compiler for the web
 
-![Travis](https://img.shields.io/travis/ethereum-play/solc-js.svg)
-[![codecov](https://codecov.io/gh/ethereum-play/solc-js/branch/master/graph/badge.svg)](https://codecov.io/gh/alincode/ethereum-play/solc-js)
-[![Dependency Status](https://img.shields.io/david/ethereum-play/solc-js.svg?style=flat)](https://david-dm.org/ethereum-play/solc-js)
-
 **smaller and faster alternative to [solc](https://www.npmjs.com/package/solc) for browser-only environments**
 * JavaScript bindings for the [solidity compiler](https://github.com/ethereum/solidity)
 * Uses the emscripten compiled solidity found in the [solc-bin repository](https://github.com/ethereum/solc-bin)
