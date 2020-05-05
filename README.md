@@ -1,7 +1,9 @@
-[![Join the chat at https://gitter.im/ethereum/play](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/ethereum/play?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Join the chat at https://gitter.im/playproject-io/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/playproject-io/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # solc-js
 cross-browser solidity compiler for the web
+
+* https://github.com/playproject-io-archive/solverify to verify solidity source code
 
 **smaller and faster alternative to [solc](https://www.npmjs.com/package/solc) for browser-only environments**
 * JavaScript bindings for the [solidity compiler](https://github.com/ethereum/solidity)
