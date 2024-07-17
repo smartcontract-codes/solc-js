@@ -41,7 +41,7 @@
     "solc-import": "^0.0.2",
     "solc-resolver": "^0.2.1",
     "solc-version": "^0.1.6",
-    "solcjs-core": "^0.6.0"
+    "solcjs-core": "^0.7.0"
   },
   "devDependencies": {
     "bel": "^6.0.0",
